@@ -1,7 +1,27 @@
 # health-data-integration — Kiro Power
 
-> Integrate health data from wearables and health exports (Apple Health, Garmin Connect)
-> into tracking apps via MCP, safely and with synthetic demo data.
+> **Bonus Lesson 2 — Kiro University Challenge**
+> Package and publish a reusable Kiro Power that integrates health data from
+> wearables (Apple Health, Garmin Connect) into tracking apps via MCP,
+> with safe synthetic demo data and built-in range validation.
+
+[![Kiro Power](https://img.shields.io/badge/Kiro-Power-7c3aed?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOCA0IDgtNE0yIDEybDggNCA4LTQiLz48L3N2Zz4=)](https://kiro.dev/powers)
+[![Agent Plugins](https://img.shields.io/badge/Agent%20Plugins-1.0.0-blue)](https://agent-plugins.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## Background — Kiro University Challenge
+
+This Power was built across two lessons of the [Kiro University Challenge](https://kiro.dev/university):
+
+| Lesson | What was built |
+|---|---|
+| **Lesson 6 — MCP** | Local MCP server (`health-import`) with 3 tools, connected to Kiro via `~/.kiro/settings/mcp.json`. Demonstrated the full flow: MCP tools → domain validation → WeightEntry payloads. |
+| **Bonus 2 — Package a Power** | The MCP server, steering conventions, and import skills packaged into this reusable Power following the [Agent Plugins spec](https://agent-plugins.org). Submitted to the Kiro Power registry. |
+
+The source project is [HealthTrack](https://github.com/ricardo8725/healthtrack) — a personal
+health tracking app built entirely with Kiro.
 
 ---
 
@@ -11,26 +31,73 @@ This Power gives Kiro the knowledge and tools to:
 
 1. **Set up a local MCP server** that simulates an external health data source
    (Apple Health exports, Garmin Connect records, CSV health data)
-2. **Query that server** using three purpose-built tools
-3. **Validate every incoming record** against safe physiological ranges before inserting
-4. **Map external records** to a WeightEntry schema, ready for INSERT into SQLite/Postgres
+2. **Query that server** using three purpose-built MCP tools
+3. **Validate every incoming record** against safe physiological ranges before reporting it as ready
+4. **Map external records** to a `WeightEntry` schema, ready for `INSERT` into SQLite or Postgres
 
-It was built as part of the **Kiro University Challenge — Lesson 6 (MCP Integration)**
-and packages the complete pattern as a reusable Power.
+No real personal health data is ever used — the included dataset is 100% synthetic,
+generated only to demonstrate the integration pattern.
 
 ---
 
-## Use case
+## Quick start (no credentials needed)
 
-You're building a health tracking app that needs to import weight data from an
-external source. You want to:
+The health-import MCP server runs locally with Node.js. No API keys, no cloud accounts.
 
-- Demonstrate the integration without using real personal health data
-- Validate that imported values (weight, height, BMI) are physiologically plausible
-- Map the external format to your app's internal schema automatically
-- Have Kiro guide the full flow: MCP → validation → payload → INSERT
+```bash
+# 1. Clone the repo
+git clone https://github.com/ricardo8725/power-health-data-integration
+cd power-health-data-integration
 
-This Power is designed for exactly that.
+# 2. Build the MCP server
+cd mcp-server
+npm install
+npm run build
+
+# 3. Smoke test — should print the server startup message and respond to initialize
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"0.0.1"}}}' \
+  | node dist/index.js
+# Expected: ✅ health-import MCP server running via stdio
+#           {"result":{"protocolVersion":"2024-11-05","capabilities":...}}
+
+# 4. Test list_sample_records
+echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_sample_records","arguments":{}}}' \
+  | node dist/index.js
+# Expected: 15 synthetic weight records with pre-calculated BMI
+```
+
+---
+
+## Installation in Kiro
+
+### Option A — Import from GitHub (recommended)
+1. Open the Powers panel in Kiro
+2. Click **Add Custom Power** → **Import from GitHub**
+3. Paste: `https://github.com/ricardo8725/power-health-data-integration`
+
+### Option B — Manual mcp.json entry
+
+After building the server (`npm run build` inside `mcp-server/`), add this to
+`~/.kiro/settings/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "health-import": {
+      "command": "node",
+      "args": ["/absolute/path/to/power-health-data-integration/mcp-server/dist/index.js"],
+      "env": {},
+      "disabled": false
+    }
+  }
+}
+```
+
+Replace `/absolute/path/to/` with the actual path where you cloned the repo.
+Then reload MCP connections from the Kiro MCP Server panel.
+
+> No placeholder credentials are needed for this server — it reads from a local
+> JSON file and communicates over stdio.
 
 ---
 
@@ -38,127 +105,113 @@ This Power is designed for exactly that.
 
 ```
 health-data-integration/
-├── plugin.json                        # Power manifest (Agent Plugins spec)
-├── mcp.json                           # MCP server definition
-├── README.md                          # This file
+├── plugin.json                          # Power manifest (Agent Plugins 1.0.0 spec)
+├── mcp.json                             # MCP server registration template
+├── README.md                            # This file
 ├── dev.kiro/
 │   └── steering/
-│       └── health-data-conventions.md # Always-on context: schema, validation, mapping
+│       └── health-data-conventions.md   # Always-on context: schema, validation rules, mapping
+├── mcp-server/                          # Ready-to-build MCP server (TypeScript/Node)
+│   ├── src/index.ts                     # Server implementation — 3 MCP tools
+│   ├── data/sample-health-data.json     # 15 synthetic weight records (jul–sep 2026)
+│   ├── package.json
+│   └── tsconfig.json
 └── skills/
     ├── setup-mcp-server/
-    │   ├── SKILL.md                   # Step-by-step server scaffolding guide
+    │   ├── SKILL.md                     # Step-by-step scaffolding guide
     │   └── references/
-    │       ├── sample-data-schema.md  # Synthetic dataset structure
-    │       └── mcp-server-template.md # Complete TypeScript implementation
+    │       ├── sample-data-schema.md    # Synthetic dataset structure & guidelines
+    │       └── mcp-server-template.md   # Complete TypeScript implementation template
     └── import-health-data/
-        ├── SKILL.md                   # Import flow: query → validate → map → report
+        ├── SKILL.md                     # Full import flow: query → validate → map → report
         └── references/
-            └── validation-rules.md    # Validation rules with rejection format
+            └── validation-rules.md      # All validation rules with rejection format
 ```
 
 ---
 
-## MCP server tools
+## MCP tools
 
-The `health-import` MCP server exposes three tools:
+| Tool | Input | What it returns |
+|---|---|---|
+| `list_sample_records` | _(none)_ | All 15 synthetic records with pre-calculated BMI and category |
+| `get_record_by_id` | `{ id: string }` | Full detail of one record (e.g. `"ext-007"`) |
+| `import_records_to_weight_tracking` | `{ fromDate?, toDate?, ids? }` | WeightEntry payloads filtered by date range or explicit ids |
 
-| Tool | Description |
-|---|---|
-| `list_sample_records` | Lists all synthetic records with pre-calculated BMI |
-| `get_record_by_id` | Returns full detail of a single record by id |
-| `import_records_to_weight_tracking` | Returns WeightEntry payloads filtered by date range or ids |
-
-All output from the server with synthetic data is labeled `⚠️ SYNTHETIC DATA`.
+All tool responses with synthetic data include a `⚠️ SYNTHETIC DATA` disclaimer.
+`id` and `userId` in returned payloads are always `null` — the app repository fills them before INSERT.
 
 ---
 
-## WeightEntry schema (target)
+## WeightEntry schema (mapping target)
 
-The mapping target in this Power is a `weight_entry` table with this shape:
-
-| Column | Type | Notes |
+| Column | Type | Constraint |
 |---|---|---|
-| `id` | TEXT (UUID v4) | Generated by repository on INSERT |
-| `user_id` | TEXT | Set by repository on INSERT |
+| `id` | TEXT (UUID v4) | Generated by repository on INSERT — `null` in payloads |
+| `user_id` | TEXT | Set by repository on INSERT — `null` in payloads |
 | `date` | TEXT | `YYYY-MM-DD` |
 | `weight_kg` | REAL | `0 < x ≤ 700` |
 | `bmi` | REAL | Calculated, 2 decimal places |
 | `bmi_category` | TEXT | `underweight` \| `normal` \| `overweight` \| `obese` |
 
-The Power's steering file and validation rules ensure every imported record
-conforms to this schema before it's reported as ready.
-
 ---
 
-## Installation
+## Validation rules (summary)
 
-### Option A — Import from GitHub in Kiro
-1. Open the Powers panel in Kiro
-2. Click **Add Custom Power** → **Import from GitHub**
-3. Paste the repo URL and confirm
+The Power enforces these rules on every record before marking it as ready for INSERT.
+See `skills/import-health-data/references/validation-rules.md` for the full spec.
 
-### Option B — Manual setup
-1. Clone or copy this folder
-2. Build and start the MCP server:
-   ```bash
-   cd mcp-server
-   npm install && npm run build
-   ```
-3. Add the server to `~/.kiro/settings/mcp.json`:
-   ```json
-   {
-     "mcpServers": {
-       "health-import": {
-         "command": "node",
-         "args": ["/absolute/path/to/mcp-server/dist/index.js"]
-       }
-     }
-   }
-   ```
-4. Reload MCP connections in Kiro
+- `weightKg > 0` and `weightKg ≤ 700`
+- `50 ≤ heightCm ≤ 300` (profile — rejects entire batch if invalid)
+- `date` format `YYYY-MM-DD`, not more than 1 day in the future
+- BMI recalculated locally and compared to source value (`|diff| < 0.01`)
+- Category must match recalculated BMI using WHO thresholds
+
+**Rejections are always explicit** — the agent never inserts silently.
 
 ---
 
 ## Skills
 
 ### `setup-mcp-server`
-Use when: "I need to create a health data MCP server from scratch."
+> Use when: "I need to create a health data MCP server from scratch."
 
-Walks you through: project scaffolding, SDK installation, implementing the
-three tools, building, smoke testing, and connecting to Kiro.
+Walks through scaffolding, SDK installation, implementing the three tools,
+building, smoke testing, and connecting to Kiro. References include a
+complete TypeScript implementation template.
 
 ### `import-health-data`
-Use when: "I want to import health records from the MCP server into my app."
+> Use when: "I want to import health records from the MCP server into my app."
 
-Walks you through: querying the server, validating each record, mapping to
-WeightEntry payloads, reporting rejections, and the INSERT pattern.
+Walks through querying the server, validating each record against physiological
+ranges, mapping to WeightEntry payloads, reporting rejections clearly, and the
+Drizzle ORM INSERT pattern.
 
 ---
 
 ## Privacy & data safety
 
-- **No real health data** is included anywhere in this Power.
-- All example records are completely fictitious, generated for demonstration only.
-- The `_meta.note` field in every dataset explicitly labels records as synthetic.
-- The MCP server never logs PII to stdout (only to stderr, and only status messages).
+- **Zero real health data** anywhere in this Power.
+- All 15 records are completely fictitious — invented weight values over a 3-month period.
+- The `_meta.note` field in `sample-health-data.json` explicitly labels every dataset as synthetic.
+- The MCP server only logs to `stderr` (startup confirmation). stdout carries only JSON-RPC.
+- No credentials, no API keys, no cloud dependencies required to run.
 
 ---
 
 ## Keywords that activate this Power
 
 `health`, `apple health`, `garmin`, `wearable`, `weight tracking`, `bmi`,
-`health data import`, `weight entry`, `health integration`, `synthetic data`
+`health data import`, `weight entry`, `health integration`, `synthetic data`, `mcp`
 
 ---
 
 ## Built with
 
 - [Kiro](https://kiro.dev) — AI-powered development environment
-- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) — MCP TypeScript SDK
-- [Agent Plugins spec](https://agent-plugins.org) — Power packaging format
-- [Kiro University Challenge](https://kiro.dev/university) — Lesson 6: MCP Integration
-
----
+- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) v1.30.0 — MCP TypeScript SDK
+- [Agent Plugins spec](https://agent-plugins.org) v1.0.0 — Power packaging format
+- [Kiro University Challenge](https://kiro.dev/university) — Lesson 6 (MCP) + Bonus 2 (Package a Power)
 
 ## License
 
