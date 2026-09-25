@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "health-data-integration",
+  "version": "1.0.0",
+  "description": "Integrate health data from wearables and health exports (Apple Health, Garmin) into tracking apps via MCP, with safe synthetic demo data and built-in range validation.",
+  "author": {
+    "name": "HealthTrack",
+    "url": "https://github.com/wreyes/healthtrack"
+  },
+  "keywords": [
+    "health",
+    "mcp",
+    "apple health",
+    "garmin",
+    "wearable",
+    "weight tracking",
+    "bmi",
+    "health data import",
+    "weight entry",
+    "health integration",
+    "synthetic data",
+    "health export"
+  ],
+  "license": "MIT"
+}

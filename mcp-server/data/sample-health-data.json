@@ -1,0 +1,120 @@
+{
+  "_meta": {
+    "note": "⚠️ SYNTHETIC DATA — These records are completely fictitious and were generated solely to demonstrate the HealthTrack MCP integration flow. They do NOT represent real health measurements of any person.",
+    "generated": "2026-09-22",
+    "source_simulation": "Apple Health / Garmin Connect",
+    "unit_weight": "kg",
+    "unit_height": "cm"
+  },
+  "profile": {
+    "heightCm": 175,
+    "dateOfBirth": "1990-04-15"
+  },
+  "records": [
+    {
+      "id": "ext-001",
+      "date": "2026-07-01",
+      "weightKg": 82.4,
+      "source": "apple_health",
+      "notes": "Morning measurement"
+    },
+    {
+      "id": "ext-002",
+      "date": "2026-07-05",
+      "weightKg": 81.9,
+      "source": "apple_health",
+      "notes": null
+    },
+    {
+      "id": "ext-003",
+      "date": "2026-07-10",
+      "weightKg": 81.5,
+      "source": "garmin",
+      "notes": "After workout"
+    },
+    {
+      "id": "ext-004",
+      "date": "2026-07-15",
+      "weightKg": 80.8,
+      "source": "apple_health",
+      "notes": null
+    },
+    {
+      "id": "ext-005",
+      "date": "2026-07-22",
+      "weightKg": 80.2,
+      "source": "apple_health",
+      "notes": "Morning measurement"
+    },
+    {
+      "id": "ext-006",
+      "date": "2026-07-29",
+      "weightKg": 79.6,
+      "source": "garmin",
+      "notes": null
+    },
+    {
+      "id": "ext-007",
+      "date": "2026-08-05",
+      "weightKg": 79.1,
+      "source": "apple_health",
+      "notes": "Morning measurement"
+    },
+    {
+      "id": "ext-008",
+      "date": "2026-08-12",
+      "weightKg": 78.7,
+      "source": "garmin",
+      "notes": "Post vacation"
+    },
+    {
+      "id": "ext-009",
+      "date": "2026-08-19",
+      "weightKg": 79.3,
+      "source": "apple_health",
+      "notes": null
+    },
+    {
+      "id": "ext-010",
+      "date": "2026-08-26",
+      "weightKg": 78.4,
+      "source": "apple_health",
+      "notes": "Morning measurement"
+    },
+    {
+      "id": "ext-011",
+      "date": "2026-09-02",
+      "weightKg": 77.9,
+      "source": "garmin",
+      "notes": null
+    },
+    {
+      "id": "ext-012",
+      "date": "2026-09-08",
+      "weightKg": 77.5,
+      "source": "apple_health",
+      "notes": "Morning measurement"
+    },
+    {
+      "id": "ext-013",
+      "date": "2026-09-12",
+      "weightKg": 77.2,
+      "source": "garmin",
+      "notes": null
+    },
+    {
+      "id": "ext-014",
+      "date": "2026-09-17",
+      "weightKg": 76.8,
+      "source": "apple_health",
+      "notes": "Morning measurement"
+    },
+    {
+      "id": "ext-015",
+      "date": "2026-09-22",
+      "weightKg": 76.5,
+      "source": "apple_health",
+      "notes": "Most recent"
+    }
+  ]
+}
